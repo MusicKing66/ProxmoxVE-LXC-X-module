@@ -379,7 +379,7 @@ function proxmoxlxc_ClientAreaOutput($params, $key)
 function proxmoxlxc_AllowFunction()
 {
     return [
-        'client' => ["Getcurrent", "delete_snapshot", "RollBACK_snapshot", "create_snapshot", "nat_add", "nat_del", "Vnc"],
+        'client' => ["Getcurrent", "GetTraffic", "delete_snapshot", "RollBACK_snapshot", "create_snapshot", "nat_add", "nat_del", "Vnc"],
     ];
 }
 
@@ -722,6 +722,7 @@ function proxmoxlxc_CreateAccount($params)
     $json_network['mask'] = $params['configoptions']['Mask'];
     $json_network['gateway'] = $params['configoptions']['gateway'];
     $json_network['rate'] = $params['configoptions_upgrade']['network'];
+    $json_network['data_limit'] = $params['configoptions_upgrade']['data_limit'];
 
     $ip_json[$ip] = $json_network;
 
@@ -766,7 +767,7 @@ function proxmoxlxc_CreateAccount($params)
     $data['cmode'] = 'console';
     $data['onboot'] = true;
     $data['nameserver'] = $params['configoptions']['dns'];
-    $data['description'] = "<h1>ArcCloud</h1></br>来自: 智简魔方ProxmoxVE-LXC模块</br>开通用户:" . $params['user_info']['username'] . "|" . $params['user_info']['id'] . "</br>产品编号:" . $params['hostid'] . "</br>产品密码:" . $params['password']; //描述
+    $data['description'] = "<h1>MiraiGrid</h1></br>来自: 智简魔方ProxmoxVE-LXC模块</br>开通用户:" . $params['user_info']['username'] . "|" . $params['user_info']['id'] . "</br>产品编号:" . $params['hostid'] . "</br>产品密码:" . $params['password']; //描述
     // $data['bwlimit']=$params['configoptions_upgrade']['network'];
     if ($params['configoptions']['swap'] == '1:1') {
         // 对等分配swap
@@ -991,6 +992,28 @@ function proxmoxlxc_Getcurrent($params)
 
     return proxmoxlxc_GET_lxc_info($params);
 }
+
+function proxmoxlxc_GetTraffic($params)
+{
+    $vmid = $params['domain'];
+    $logFile = __DIR__ . '/traffic_log.json';
+
+    $logs = [];
+    if (file_exists($logFile)) {
+        $logs = json_decode(file_get_contents($logFile), true);
+    }
+
+    $entry = $logs[$vmid] ?? ['rx' => 0, 'tx' => 0, 'month_used' => 0];
+
+    // 确保 data_limit 存在：来自 JSON，否则 fallback 到配置
+    if (!isset($entry['data_limit'])) {
+        $configLimitGB = $params['configoptions_upgrade']['data_limit'] ?? 0;
+        $entry['data_limit'] = $configLimitGB * 1024 * 1024 * 1024; // 转换成字节
+    }
+
+    return ['code' => 0, 'data' => $entry];
+}
+
 
 
 // 获取VMID
