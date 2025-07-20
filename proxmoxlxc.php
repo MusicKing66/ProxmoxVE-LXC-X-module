@@ -737,6 +737,7 @@ function proxmoxlxc_CreateAccount($params)
     $network['bridge'] = $params['configoptions']['net_name'];
     $network['gw'] = $params['configoptions']['gateway'];
     $network['ip'] = $ip . "/" . $params['configoptions']['Mask'];
+    $network['ip6'] = 'auto';
     $network['rate'] = $params['configoptions_upgrade']['network'];
     foreach ($network as $key => $value) {
         if ($network_body == "") {
