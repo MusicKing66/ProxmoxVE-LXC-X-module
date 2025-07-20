@@ -745,6 +745,8 @@ function proxmoxlxc_CreateAccount($params)
             $network_body = $network_body . "%2C" . $key . "%3D" . $value;
         }
     }
+    // 添加防火墙启用参数
+    $network_body = $network_body . "%2Cfirewall%3D1";
     $data['start'] = 1;
     $data['ostemplate'] = $params['configoptions_upgrade']['os']; // 模板
     $data['vmid'] = $vmid; // vmid
@@ -779,6 +781,33 @@ function proxmoxlxc_CreateAccount($params)
 
 
     if ($info['success']) {
+
+        // 等待容器创建完成
+        sleep(2);
+
+        // 应用IPv6白名单安全组
+        $firewall_data = [];
+        $firewall_data['type'] = 'group';
+        $firewall_data['action'] = 'lxc-ipv6-whitelist';  // 你的安全组名称
+        $firewall_data['enable'] = 1;
+        $firewall_data['iface'] = 'net0';
+
+        // 调用API添加安全组
+        $firewall_result = proxmoxlxc_request(
+            $params,
+            "/api2/extjs/nodes/" . $params['server_host'] . "/lxc/" . $vmid . "/firewall/rules",
+            $firewall_data,
+            "POST"
+        );
+
+        if ($firewall_result) {
+            $firewall_info = json_decode($firewall_result, true);
+            if (isset($firewall_info['success']) && $firewall_info['success']) {
+                active_logs("IPv6防火墙安全组已应用到容器 " . $vmid, $params['uid'], 1);
+            } else {
+                active_logs("IPv6防火墙安全组应用失败: " . json_encode($firewall_info), $params['uid'], 2);
+            }
+        }
 
         // 判断是否为nat机器 如果是就执行下默认映射操作
         if ($params['configoptions']['nat'] == "nat") {
