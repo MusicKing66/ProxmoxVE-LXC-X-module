@@ -309,8 +309,8 @@ function proxmoxlxc_ClientAreaOutput($params, $key)
         // $min_port = (int)$port_pool[0];
         // $max_port = (int)$port_pool[1];
 
-        $min_port = (int)$params['configoptions']['port_pool_start'];
-        $max_port = (int)$params['configoptions']['port_pool_end'];
+        $min_port = (int) $params['configoptions']['port_pool_start'];
+        $max_port = (int) $params['configoptions']['port_pool_end'];
 
         if ($nat_list['ErrMsg'] == 'Success') {
             //  return "登陆成功了 本币";
@@ -332,7 +332,7 @@ function proxmoxlxc_ClientAreaOutput($params, $key)
             ];
         } else {
             //  return json_encode($info);
-            return  [
+            return [
                 'template' => 'templates/error.html',
                 'vars' => [
                     'error' => [
@@ -379,7 +379,7 @@ function proxmoxlxc_ClientAreaOutput($params, $key)
 function proxmoxlxc_AllowFunction()
 {
     return [
-        'client' => ["Getcurrent", "delete_snapshot", "RollBACK_snapshot", "create_snapshot", "nat_add", "nat_del", "Vnc"],
+        'client' => ["Getcurrent", "GetTraffic", "delete_snapshot", "RollBACK_snapshot", "create_snapshot", "nat_add", "nat_del", "Vnc"],
     ];
 }
 
@@ -661,11 +661,6 @@ function proxmoxlxc_Vnc($params)
 function proxmoxlxc_CreateAccount($params)
 {
 
-
-
-
-
-
     $ip_while_num_max = 100; // IP生成循环次数，如果超过一定阈值直接弹出IP不足
     $ip_while_num = 0;
     $vmid = proxmoxlxc_nextid($params);
@@ -718,10 +713,12 @@ function proxmoxlxc_CreateAccount($params)
 
     $json_network['server_vmid'] = $vmid; //对应主机VMID
     $json_network['bridge'] = $params['configoptions']['net_name'];
+    $json_network['service_id'] = $params['hostid'];
     $json_network['ip'] = $ip;
     $json_network['mask'] = $params['configoptions']['Mask'];
     $json_network['gateway'] = $params['configoptions']['gateway'];
     $json_network['rate'] = $params['configoptions_upgrade']['network'];
+    $json_network['data_limit'] = $params['configoptions_upgrade']['data_limit'];
 
     $ip_json[$ip] = $json_network;
 
@@ -766,7 +763,7 @@ function proxmoxlxc_CreateAccount($params)
     $data['cmode'] = 'console';
     $data['onboot'] = true;
     $data['nameserver'] = $params['configoptions']['dns'];
-    $data['description'] = "<h1>ArcCloud</h1></br>来自: 智简魔方ProxmoxVE-LXC模块</br>开通用户:" . $params['user_info']['username'] . "|" . $params['user_info']['id'] . "</br>产品编号:" . $params['hostid'] . "</br>产品密码:" . $params['password']; //描述
+    $data['description'] = "<h1>MiraiGrid</h1></br>来自: 智简魔方ProxmoxVE-LXC模块</br>开通用户:" . $params['user_info']['username'] . "|" . $params['user_info']['id'] . "</br>产品编号:" . $params['hostid'] . "</br>产品密码:" . $params['password']; //描述
     // $data['bwlimit']=$params['configoptions_upgrade']['network'];
     if ($params['configoptions']['swap'] == '1:1') {
         // 对等分配swap
@@ -782,26 +779,6 @@ function proxmoxlxc_CreateAccount($params)
 
 
     if ($info['success']) {
-
-        // ✅ 添加 Docker 所需的 lxc 配置项
-        // $ct_config_extra = [
-        //     'lxc.apparmor.profile' => 'unconfined',
-        //     'lxc.cgroup.devices.allow' => 'a',
-        //     'lxc.cap.drop' => ''
-        // ];
-
-        // foreach ($ct_config_extra as $key => $value) {
-        //     $set_config_data = [
-        //         'key' => $key,
-        //         'value' => $value
-        //     ];
-        //     proxmoxlxc_request(
-        //         $params,
-        //         "/api2/extjs/nodes/{$params['server_host']}/lxc/{$vmid}/config",
-        //         $set_config_data,
-        //         'PUT'
-        //     );
-        // }
 
         // 判断是否为nat机器 如果是就执行下默认映射操作
         if ($params['configoptions']['nat'] == "nat") {
@@ -825,14 +802,9 @@ function proxmoxlxc_CreateAccount($params)
 
         /*更新数据列表*/
 
-
-
         $update['dedicatedip'] = $ip;
         $update['domain'] = $data['vmid'];
         Db::name('host')->where('id', $params['hostid'])->update($update);
-
-
-
 
         /*写入本地文件*/
 
@@ -992,13 +964,35 @@ function proxmoxlxc_Getcurrent($params)
     return proxmoxlxc_GET_lxc_info($params);
 }
 
+function proxmoxlxc_GetTraffic($params)
+{
+    $vmid = $params['domain'];
+    $logFile = __DIR__ . '/traffic_log.json';
+
+    $logs = [];
+    if (file_exists($logFile)) {
+        $logs = json_decode(file_get_contents($logFile), true);
+    }
+
+    $entry = $logs[$vmid] ?? ['rx' => 0, 'tx' => 0, 'month_used' => 0];
+
+    // 确保 data_limit 存在：来自 JSON，否则 fallback 到配置
+    if (!isset($entry['data_limit'])) {
+        $configLimitGB = $params['configoptions_upgrade']['data_limit'] ?? 0;
+        $entry['data_limit'] = $configLimitGB * 1024 * 1024 * 1024; // 转换成字节
+    }
+
+    return ['code' => 0, 'data' => $entry];
+}
+
+
 
 // 获取VMID
 function proxmoxlxc_nextid($params)
 {
     $vmid_file_path = __DIR__ . "/vmid.json";
     $product_unique_value = $params['configoptions']['product_unique_value'];
-    $start_vmid = (int)$params['configoptions']['vmid_start'];
+    $start_vmid = (int) $params['configoptions']['vmid_start'];
 
     // 初始化 $vmid_data
     $vmid_data = [];
@@ -1019,7 +1013,7 @@ function proxmoxlxc_nextid($params)
 
             if (isset($vmid_data[$product_unique_value])) {
                 // 获取当前 VMID 并返回
-                $current_vmid = (int)$vmid_data[$product_unique_value]['data'];
+                $current_vmid = (int) $vmid_data[$product_unique_value]['data'];
 
                 // 更新 VMID 并写回文件
                 $vmid_data[$product_unique_value]['data'] = $current_vmid + 1;
@@ -1133,7 +1127,7 @@ function proxmoxlxc_status($params)
 {
 
 
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/status/current"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/status/current"), true);
     $result['status'] = 'success';
     if ($request['data']['status'] == 'running') {
         // 运行中
@@ -1153,14 +1147,14 @@ function proxmoxlxc_status($params)
 // 获取LXC信息
 function proxmoxlxc_GET_lxc_info($params)
 {
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/status/current"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/status/current"), true);
     return $request;
 }
 
 // 获取LXC配置信息
 function proxmoxlxc_GET_lxc_config($params)
 {
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/config"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/config"), true);
 
     if ($request['data'] == null || $request == null) {
         return false;
@@ -1179,7 +1173,7 @@ function proxmoxlxc_GET_lxc_config($params)
     // 格式化硬盘
     $temp_disk_info = explode(",", $request['data']['rootfs']);
 
-    $request['data']['rootfs'] =  explode(",", $request['data']['rootfs']);;
+    $request['data']['rootfs'] = explode(",", $request['data']['rootfs']);;
 
 
     return $request;
@@ -1190,7 +1184,7 @@ function proxmoxlxc_GET_lxc_config($params)
 // 获取快照列表
 function proxmoxlxc_GET_lxc_snapshot_list($params)
 {
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/snapshot/"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/snapshot/"), true);
     $temp = [];
     foreach ($request['data'] as $value) {
 
@@ -1215,7 +1209,7 @@ function proxmoxlxc_delete_snapshot($params)
 
     $post = input('post.');
 
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/snapshot/" . $post['name'], "", "DELETE"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/snapshot/" . $post['name'], "", "DELETE"), true);
 
     if ($request['data'] == null || $request == null) {
         return false;
@@ -1230,7 +1224,7 @@ function proxmoxlxc_RollBACK_snapshot($params)
 
     $post = input('post.');
 
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/snapshot/" . $post['name'] . "/rollback", "", "POST"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/snapshot/" . $post['name'] . "/rollback", "", "POST"), true);
 
     if ($request['data'] == null || $request == null) {
         return false;
@@ -1258,7 +1252,7 @@ function proxmoxlxc_create_snapshot($params)
     $data['snapname'] = $post['name'];
     $data['description'] = $post['description'];
 
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/snapshot/", $data, "POST"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/lxc/" . $params['domain'] . "/snapshot/", $data, "POST"), true);
 
     // 调试代码
     //active_logs(json_encode($request).json_encode($data).$params['server_host'].$params['domain']);
@@ -1277,7 +1271,7 @@ function proxmoxlxc_tasks_get_list($params)
 {
 
 
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/tasks?vmid=" . $params['domain'] . "&start=0&limit=10"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/json/nodes/" . $params['server_host'] . "/tasks?vmid=" . $params['domain'] . "&start=0&limit=10"), true);
 
     if ($request['data'] == null || $request == null) {
         return false;
@@ -1362,8 +1356,8 @@ function proxmoxlxc_nat_add($params, $post = "")
     // $port_pool = explode(',', $params['configoptions']['port_pool_opt']);
     // $min_port = (int)$port_pool[0];
     // $max_port = (int)$port_pool[1];
-    $min_port = (int)$params['configoptions']['port_pool_start'];
-    $max_port = (int)$params['configoptions']['port_pool_end'];
+    $min_port = (int) $params['configoptions']['port_pool_start'];
+    $max_port = (int) $params['configoptions']['port_pool_end'];
 
     // 检查 post['wan_port'] 是否在合法范围内
     if (!empty($post['wan_port']) && ($post['wan_port'] < $min_port || $post['wan_port'] > $max_port)) {
@@ -1638,7 +1632,7 @@ function proxmoxlxc_nat_request($params, $url, $data)
     $ch = curl_init($login_url); //初始化
     curl_setopt($ch, CURLOPT_HEADER, 0); //不返回header部分
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); //返回字符串，??直接输出
-    curl_setopt($ch, CURLOPT_COOKIEJAR,  $cookie_file); //存储cookies
+    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file); //存储cookies
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // 屏蔽SSL
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE); // 屏蔽SSL
@@ -1682,7 +1676,7 @@ function proxmoxlxc_user_add($params, $username, $password, $vmid)
     $data['password'] = $password;
     $data['comment'] = "用户:" . $params['user_info']['username'] . "|" . $params['user_info']['id'] . "的VNC账号,服务器编号:" . $vmid;
 
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/extjs/access/users", $data, "POST"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/extjs/access/users", $data, "POST"), true);
 
     if ($request == null) {
         return FALSE;
@@ -1697,7 +1691,7 @@ function proxmoxlxc_user_add($params, $username, $password, $vmid)
         $qx['roles'] = "PVEVMUser";
 
         // 请求
-        $request1 =  json_decode(proxmoxlxc_request($params, "/api2/extjs/access/acl", $qx, "PUT"), true);
+        $request1 = json_decode(proxmoxlxc_request($params, "/api2/extjs/access/acl", $qx, "PUT"), true);
 
         return $request1;
     }
@@ -1709,7 +1703,7 @@ function proxmoxlxc_user_add($params, $username, $password, $vmid)
 function proxmoxlxc_user_del($params)
 {
 
-    $request =  json_decode(proxmoxlxc_request($params, "/api2/extjs/access/users/" . $params['dedicatedip'] . "@pve", "", "DELETE"), true);
+    $request = json_decode(proxmoxlxc_request($params, "/api2/extjs/access/users/" . $params['dedicatedip'] . "@pve", "", "DELETE"), true);
 
     if ($request == null) {
         return FALSE;

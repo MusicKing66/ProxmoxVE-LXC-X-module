@@ -1,36 +1,45 @@
- <script src="./plugins/servers/proxmoxlxc/templates/echarts.min.js" type="text/javascript" charset="utf-8"></script>
- 
- <style type="text/css" media="all">
- 
-     .border-left-warning {
-    border-left: .25rem solid #f6c23e!important;
-}
-.border-left-info {
-    border-left: .25rem solid #36b9cc!important;
-}.border-left-success {
-    border-left: .25rem solid #1cc88a!important;
-}
-.border-left-primary {
-    border-left: .25rem solid #4e73df!important;
-}.text-gray-300 {
-    color: #dddfeb!important;
-}
-.shadow {
-    box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;
-}
-.fa-2x {
+<script src="./plugins/servers/proxmoxlxc/templates/echarts.min.js" type="text/javascript" charset="utf-8"></script>
+
+<style type="text/css" media="all">
+  .border-left-warning {
+    border-left: .25rem solid #f6c23e !important;
+  }
+
+  .border-left-info {
+    border-left: .25rem solid #36b9cc !important;
+  }
+
+  .border-left-success {
+    border-left: .25rem solid #1cc88a !important;
+  }
+
+  .border-left-primary {
+    border-left: .25rem solid #4e73df !important;
+  }
+
+  .text-gray-300 {
+    color: #dddfeb !important;
+  }
+
+  .shadow {
+    box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .15) !important;
+  }
+
+  .fa-2x {
     font-size: 2em;
-}
-.no-gutters {
+  }
+
+  .no-gutters {
     margin-right: 0;
     margin-left: 0;
-}
-.card {
-     margin-bottom: 0px; 
-   
-}
- </style>
- <!--<button type="button" class="btn btn-success sm-text text-uppercase mb-2" data-toggle="modal" data-target="#VNC">VNC</button>-->
+  }
+
+  .card {
+    margin-bottom: 0px;
+
+  }
+</style>
+<!--<button type="button" class="btn btn-success sm-text text-uppercase mb-2" data-toggle="modal" data-target="#VNC">VNC</button>-->
 <!-- 执行一次POST请求 随后打开VNC-->
 
 <!--使用概括-->
@@ -44,10 +53,10 @@
             <div class="row no-gutters align-items-center">
               <div class="col">
                 <div class="progress progress-sm mr-2">
-                  <div class="progress-bar bg-primary" role="progressbar" id="cpu_jdt" style="width:0%" aria-valuenow="40"
-                    aria-valuemin="0" aria-valuemax="100"></div>
+                  <div class="progress-bar bg-primary" role="progressbar" id="cpu_jdt" style="width:0%"
+                    aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                 
+
               </div>
             </div>
             <div class="h5 mt-1 font-weight-bold text-gray-800"><a id="cpu">0</a>% 的 <a id="cpus">0</a> CPU(s)</div>
@@ -62,18 +71,18 @@
         <div class="row no-gutters align-items-center">
           <div class="col mr-2">
             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">内存使用率(<a id="mem_"></a>%)</div>
-           <div class="row no-gutters align-items-center">
+            <div class="row no-gutters align-items-center">
               <div class="col">
                 <div class="progress progress-sm mr-2">
-                  <div class="progress-bar bg-success" role="progressbar" id="mem_jdt" style="width: 0%" aria-valuenow="40"
-                    aria-valuemin="0" aria-valuemax="100"></div>
+                  <div class="progress-bar bg-success" role="progressbar" id="mem_jdt" style="width: 0%"
+                    aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                 
+
               </div>
             </div>
             <div class="h5 mt-1 font-weight-bold text-gray-800"><a id="max_mem">512.00</a> MiB</div>
           </div>
-         
+
         </div>
       </div>
     </div>
@@ -87,17 +96,18 @@
             <div class="row no-gutters align-items-center">
               <div class="col">
                 <div class="progress progress-sm mr-2">
-                  <div class="progress-bar bg-info" role="progressbar" id="disk_jdt" style="width: 0%" aria-valuenow="40"
-                    aria-valuemin="0" aria-valuemax="100"></div>
+                  <div class="progress-bar bg-info" role="progressbar" id="disk_jdt" style="width: 0%"
+                    aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                 
+
               </div>
             </div>
-            <div class="h5 mb-0 mt-1 font-weight-bold text-gray-800"><a id="min_disk"></a> / <a id="max_disk"></a> G</div>
+            <div class="h5 mb-0 mt-1 font-weight-bold text-gray-800"><a id="min_disk"></a> / <a id="max_disk"></a> G
+            </div>
           </div>
-    
+
         </div>
-    
+
       </div>
     </div>
   </div>
@@ -113,6 +123,35 @@
       </div>
     </div>
   </div>
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-danger shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">流量使用</div>
+
+            <div class="row no-gutters align-items-center mb-2">
+              <div class="col">
+                <div class="progress progress-sm mr-2">
+                  <div class="progress-bar bg-danger" role="progressbar" id="traffic_bar" style="width: 0%"
+                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+              <div class="col-auto">
+                <div class="small font-weight-bold text-gray-800"><a id="traffic_percent">0</a>%</div>
+              </div>
+            </div>
+
+            <div class="h6 mb-1 font-weight-bold text-gray-800">
+              上传：<a id="traffic_tx">0</a> GB<br>
+              下载：<a id="traffic_rx">0</a> GB<br>
+              总计：<a id="traffic_total">0</a> GB / <a id="traffic_limit">0</a> GB
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -120,154 +159,180 @@
 
 
 <div class="card shadow mb-4">
-<div class="card-header py-3">
-<h6 class="m-0 font-weight-bold text-primary">PVE控制台</h6>
-</div>
-<div class="card-body">
-<p>使用ProxmoxVE控制面板操作您的服务器</p>
-<p class="mb-0">
-    VMID：<a id="vmid" style="
-        display: ;
-    ">{$params['domain']}</a>
-
-    <br>
-
-    用户名：<a id="username_vnc" style="
-        display: ;
-    ">{$params['dedicatedip']}</a>
-
-    <br>
-
-    密码：<a id="password_vnc" style="
-        display: ;
-    ">{$params['password']}</a>
-
-    <br>
-
-    控制面板：<a id="url_vnc" style="
-        display: ;
-    ">{$params['server_http_prefix']}://{$params['server_ip']}:{$params['port']}</a>
-</p>
-</div>
+  <div class="card-header py-3">
+    <h6 class="m-0 font-weight-bold text-primary">PVE控制台</h6>
+  </div>
+  <div class="card-body">
+    <p>使用 ProxmoxVE 控制面板操作您的服务器</p>
+    <p class="mb-2 text-danger font-weight-bold">
+      ⚠️ SSH 可能未启用，如无法连接，请通过本控制面板的 <b>VNC 控制台</b> 进入容器，手动开启 SSH 服务
+    </p>
+    <p class="mb-0">
+      VMID：<a id="vmid">{$params['domain']}</a><br>
+      User name：<a id="username_vnc">{$params['dedicatedip']}</a><br>
+      Password：<a id="password_vnc">{$params['password']}</a><br>
+      Realm：<span>Proxmox VE authentication server</span><br>
+      控制面板：<a id="url_vnc" href="{$params['server_http_prefix']}://{$params['server_ip']}:{$params['port']}"
+        target="_blank">
+        {$params['server_http_prefix']}://{$params['server_ip']}:{$params['port']}
+      </a>
+    </p>
+    <hr>
+    <button class="btn btn-sm btn-primary mt-2" onclick="copySSHCommand()">📋 一键复制开启 root SSH 命令</button>
+    <p id="copyStatus" class="mt-2 text-success" style="display:none;">✅ 命令已复制！请登录 PVE 控制台粘贴执行</p>
+  </div>
 </div>
 
 
 <script type="text/javascript" charset="utf-8">
-      
-    
-    // 请求后端获取使用概况
-    
-        current = setInterval(()=>{
-           get_current()
-        },1000)//2秒查一下
-    
-      function get_current(){
-            
-            var body = {"func":"Getcurrent"}
-            $.post("{$MODULE_CUSTOM_API}",body,function(data,status){
-                
-                // CPU使用率
-                var cpu_b = Math.round(data.data.cpu.toString().substring(0,4) * 100)
-                cpus.innerHTML = data.data.cpus
-                cpu_jdt.style = "width:"+cpu_b+"%"
-                cpu.innerHTML= cpu_b
-                
-                // 内存使用率
-                var run_mem = (data.data.mem / 1024) / 1024
-                var mem_max = (data.data.maxmem / 1024) / 1024
-                max_mem.innerHTML= Math.round(run_mem) + "MiB /" + mem_max 
-                mem_jdt.style = "width:"+Math.round(run_mem/mem_max*100)+"%"
-                mem_.innerHTML = Math.round(run_mem/mem_max*100)
-                
-                // 磁盘使用率
-                var maxdisk =  Math.round((data.data.maxdisk / 1024) / 1024 / 1024)
-                
-                
-                
-                var w_disk = Math.round(((data.data.disk) / 1024) / 1024)
-                
-                if(w_disk > 4096){
-                    // 数量太大 转GB格式
-                    min_disk.innerHTML = w_disk / 1024 + "G"
-                    
-                }else{
-                    min_disk.innerHTML = w_disk + "M"
-                   
-                }
-                max_disk.innerHTML = maxdisk
-                disk_jdt.style = "width:"+Math.round(w_disk / 1024/maxdisk*100)+"%"
-                disk_.innerHTML = Math.round(w_disk / 1024/maxdisk*100)
-                
-                // 运行时间
-                
-                if(data.data.uptime>86400){
-                    run_time.innerHTML =Math.round(data.data.uptime / 60 / 60 / 24) + " 天"
-                }else if(data.data.uptime<3600){
-                    run_time.innerHTML =Math.round(data.data.uptime / 60) + " 分钟"
-                }
-                
-                else{
-                    run_time.innerHTML =Math.round(data.data.uptime / 60 / 60 ) + " 小时"
-                }
-                
-                
-                
-                
-                // console.log(maxdisk)
-                    
-             })
-            
-        }
-        
-        
-        
-        
-        function ajax(options){
-        //创建一个ajax对象
-        var xhr = new XMLHttpRequest() || new ActiveXObject("Microsoft,XMLHTTP");
-        //数据的处理 {a:1,b:2} a=1&b=2;
-        if(typeof(options.data)!='string'){
-            var str = "";
-            for(var key in options.data){
-                str+="&"+key+"="+options.data[key];
-            }
-            str = str.slice(1)
-        }else{
-            var str = options.data;
-        }
-        
-        options.dataType=options.dataType||'json';
-        if(options.type == "get"){
-            var url = options.url+"?"+str;
-            xhr.open("get",url);
-            xhr.setRequestHeader("Authorization","JWT {$Think.get.jwt}");
-            xhr.send();
-        }else if(options.type == "post"){
-            xhr.open("post",options.url);
-            xhr.setRequestHeader("content-type","application/x-www-form-urlencoded");
-            xhr.setRequestHeader("Authorization","JWT {$Think.get.jwt}");
-            xhr.send(str)
-        }
-        //监听
-        xhr.onreadystatechange = function(){
-            //当请求成功的时候
-            if(xhr.readyState == 4 && xhr.status == 200){
-                var d = xhr.responseText;
-                d = JSON.parse(d);
-                //将请求的数据传递给成功回调函数
-                options.success&&options.success(d,xhr.responseXML)
-            }else if(xhr.status != 200){
-                //当失败的时候将服务器的状态传递给失败的回调函数
-                options.error&&options.error(xhr.status);
-            }
-        }
+
+
+  // 请求后端获取使用概况
+
+  current = setInterval(() => {
+    get_current()
+    get_traffic();
+  }, 1000)//2秒查一下
+
+  function get_current() {
+
+    var body = { "func": "Getcurrent" }
+    $.post("{$MODULE_CUSTOM_API}", body, function (data, status) {
+
+      // CPU使用率
+      var cpu_b = Math.round(data.data.cpu.toString().substring(0, 4) * 100)
+      cpus.innerHTML = data.data.cpus
+      cpu_jdt.style = "width:" + cpu_b + "%"
+      cpu.innerHTML = cpu_b
+
+      // 内存使用率
+      var run_mem = (data.data.mem / 1024) / 1024
+      var mem_max = (data.data.maxmem / 1024) / 1024
+      max_mem.innerHTML = Math.round(run_mem) + "MiB /" + mem_max
+      mem_jdt.style = "width:" + Math.round(run_mem / mem_max * 100) + "%"
+      mem_.innerHTML = Math.round(run_mem / mem_max * 100)
+
+      // 磁盘使用率
+      var maxdisk = Math.round((data.data.maxdisk / 1024) / 1024 / 1024)
+
+
+
+      var w_disk = Math.round(((data.data.disk) / 1024) / 1024)
+
+      if (w_disk > 4096) {
+        // 数量太大 转GB格式
+        min_disk.innerHTML = w_disk / 1024 + "G"
+
+      } else {
+        min_disk.innerHTML = w_disk + "M"
+
+      }
+      max_disk.innerHTML = maxdisk
+      disk_jdt.style = "width:" + Math.round(w_disk / 1024 / maxdisk * 100) + "%"
+      disk_.innerHTML = Math.round(w_disk / 1024 / maxdisk * 100)
+
+      // 运行时间
+
+      if (data.data.uptime > 86400) {
+        run_time.innerHTML = Math.round(data.data.uptime / 60 / 60 / 24) + " 天"
+      } else if (data.data.uptime < 3600) {
+        run_time.innerHTML = Math.round(data.data.uptime / 60) + " 分钟"
+      }
+
+      else {
+        run_time.innerHTML = Math.round(data.data.uptime / 60 / 60) + " 小时"
+      }
+      // console.log(maxdisk)
+    })
+  }
+
+
+  function get_traffic() {
+    var body = { func: "GetTraffic", vmid: $("#vmid").text() };
+
+    $.post("{$MODULE_CUSTOM_API}", body, function (data, status) {
+      if (!data || !data.data) return;
+
+      let tx = (data.data.tx / 1073741824).toFixed(2); // 上传 GB
+      let rx = (data.data.rx / 1073741824).toFixed(2); // 下载 GB
+      let total = (data.data.month_used / 1073741824).toFixed(2); // 总用 GB
+      let limit = (data.data.data_limit / 1073741824).toFixed(0); // 限额 GB
+
+      let percent = 0;
+      if (limit > 0) {
+        percent = Math.min(100, Math.round((total / limit) * 100));
+      }
+
+      $("#traffic_tx").text(tx);
+      $("#traffic_rx").text(rx);
+      $("#traffic_total").text(total);
+      $("#traffic_limit").text(limit);
+      $("#traffic_percent").text(percent);
+
+      $("#traffic_bar").css("width", percent + "%");
+      $("#traffic_bar").attr("aria-valuenow", percent);
+    });
+  }
+
+
+  function copySSHCommand() {
+    const command = `sed -i 's/^#\\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \\
+sed -i 's/^#\\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config && \\
+/etc/init.d/ssh restart`;
+
+    navigator.clipboard.writeText(command).then(function () {
+      document.getElementById("copyStatus").style.display = "block";
+    }, function (err) {
+      alert("复制失败：" + err);
+    });
+  }
+
+  function ajax(options) {
+    //创建一个ajax对象
+    var xhr = new XMLHttpRequest() || new ActiveXObject("Microsoft,XMLHTTP");
+    //数据的处理 {a:1,b:2} a=1&b=2;
+    if (typeof (options.data) != 'string') {
+      var str = "";
+      for (var key in options.data) {
+        str += "&" + key + "=" + options.data[key];
+      }
+      str = str.slice(1)
+    } else {
+      var str = options.data;
     }
-        
-    
-    
-    
-    
-    
-    
-   
+
+    options.dataType = options.dataType || 'json';
+    if (options.type == "get") {
+      var url = options.url + "?" + str;
+      xhr.open("get", url);
+      xhr.setRequestHeader("Authorization", "JWT {$Think.get.jwt}");
+      xhr.send();
+    } else if (options.type == "post") {
+      xhr.open("post", options.url);
+      xhr.setRequestHeader("content-type", "application/x-www-form-urlencoded");
+      xhr.setRequestHeader("Authorization", "JWT {$Think.get.jwt}");
+      xhr.send(str)
+    }
+    //监听
+    xhr.onreadystatechange = function () {
+      //当请求成功的时候
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        var d = xhr.responseText;
+        d = JSON.parse(d);
+        //将请求的数据传递给成功回调函数
+        options.success && options.success(d, xhr.responseXML)
+      } else if (xhr.status != 200) {
+        //当失败的时候将服务器的状态传递给失败的回调函数
+        options.error && options.error(xhr.status);
+      }
+    }
+  }
+
+
+
+
+
+
+
+
 </script>
