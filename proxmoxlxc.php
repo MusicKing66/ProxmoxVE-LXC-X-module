@@ -780,26 +780,6 @@ function proxmoxlxc_CreateAccount($params)
 
     if ($info['success']) {
 
-        // ✅ 添加 Docker 所需的 lxc 配置项
-        // $ct_config_extra = [
-        //     'lxc.apparmor.profile' => 'unconfined',
-        //     'lxc.cgroup.devices.allow' => 'a',
-        //     'lxc.cap.drop' => ''
-        // ];
-
-        // foreach ($ct_config_extra as $key => $value) {
-        //     $set_config_data = [
-        //         'key' => $key,
-        //         'value' => $value
-        //     ];
-        //     proxmoxlxc_request(
-        //         $params,
-        //         "/api2/extjs/nodes/{$params['server_host']}/lxc/{$vmid}/config",
-        //         $set_config_data,
-        //         'PUT'
-        //     );
-        // }
-
         // 判断是否为nat机器 如果是就执行下默认映射操作
         if ($params['configoptions']['nat'] == "nat") {
             $post['comment'] = $params['domain'] . "的远程端口";
@@ -822,14 +802,9 @@ function proxmoxlxc_CreateAccount($params)
 
         /*更新数据列表*/
 
-
-
         $update['dedicatedip'] = $ip;
         $update['domain'] = $data['vmid'];
         Db::name('host')->where('id', $params['hostid'])->update($update);
-
-
-
 
         /*写入本地文件*/
 
@@ -970,9 +945,7 @@ function proxmoxlxc_SuspendAccount($params)
     proxmoxlxc_HardOff($params);
 }
 // 解除暂停
-function proxmoxlxc_UnsuspendAccount($params)
-{
-}
+function proxmoxlxc_UnsuspendAccount($params) {}
 
 
 /*功能函数*/
@@ -1085,9 +1058,7 @@ function proxmoxlxc_nextid($params)
 
 // 删除VMID
 // 这个功能先咕咕，没思路
-function proxmoxlxc_delete_id($params)
-{
-}
+function proxmoxlxc_delete_id($params) {}
 
 
 // 没有唯一id，被取代
@@ -1202,8 +1173,7 @@ function proxmoxlxc_GET_lxc_config($params)
     // 格式化硬盘
     $temp_disk_info = explode(",", $request['data']['rootfs']);
 
-    $request['data']['rootfs'] = explode(",", $request['data']['rootfs']);
-    ;
+    $request['data']['rootfs'] = explode(",", $request['data']['rootfs']);;
 
 
     return $request;
@@ -1752,9 +1722,7 @@ function proxmoxlxc_user_ban()
 }
 
 // 解除禁用用户
-function proxmoxlxc_user_unban()
-{
-}
+function proxmoxlxc_user_unban() {}
 
 // 获取用户访问VNC授权
 function proxmoxlxc_get_ticket($params)

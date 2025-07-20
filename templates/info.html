@@ -163,30 +163,23 @@
     <h6 class="m-0 font-weight-bold text-primary">PVE控制台</h6>
   </div>
   <div class="card-body">
-    <p>使用ProxmoxVE控制面板操作您的服务器</p>
-    <p class="mb-0">
-      VMID：<a id="vmid" style="
-        display: ;
-    ">{$params['domain']}</a>
-
-      <br>
-
-      用户名：<a id="username_vnc" style="
-        display: ;
-    ">{$params['dedicatedip']}</a>
-
-      <br>
-
-      密码：<a id="password_vnc" style="
-        display: ;
-    ">{$params['password']}</a>
-
-      <br>
-
-      控制面板：<a id="url_vnc" style="
-        display: ;
-    ">{$params['server_http_prefix']}://{$params['server_ip']}:{$params['port']}</a>
+    <p>使用 ProxmoxVE 控制面板操作您的服务器</p>
+    <p class="mb-2 text-danger font-weight-bold">
+      ⚠️ SSH 可能未启用，如无法连接，请通过本控制面板的 <b>VNC 控制台</b> 进入容器，手动开启 SSH 服务
     </p>
+    <p class="mb-0">
+      VMID：<a id="vmid">{$params['domain']}</a><br>
+      User name：<a id="username_vnc">{$params['dedicatedip']}</a><br>
+      Password：<a id="password_vnc">{$params['password']}</a><br>
+      Realm：<span>Proxmox VE authentication server</span><br>
+      控制面板：<a id="url_vnc" href="{$params['server_http_prefix']}://{$params['server_ip']}:{$params['port']}"
+        target="_blank">
+        {$params['server_http_prefix']}://{$params['server_ip']}:{$params['port']}
+      </a>
+    </p>
+    <hr>
+    <button class="btn btn-sm btn-primary mt-2" onclick="copySSHCommand()">📋 一键复制开启 root SSH 命令</button>
+    <p id="copyStatus" class="mt-2 text-success" style="display:none;">✅ 命令已复制！请登录 PVE 控制台粘贴执行</p>
   </div>
 </div>
 
@@ -282,7 +275,17 @@
   }
 
 
+  function copySSHCommand() {
+    const command = `sed -i 's/^#\\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \\
+sed -i 's/^#\\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config && \\
+/etc/init.d/ssh restart`;
 
+    navigator.clipboard.writeText(command).then(function () {
+      document.getElementById("copyStatus").style.display = "block";
+    }, function (err) {
+      alert("复制失败：" + err);
+    });
+  }
 
   function ajax(options) {
     //创建一个ajax对象
